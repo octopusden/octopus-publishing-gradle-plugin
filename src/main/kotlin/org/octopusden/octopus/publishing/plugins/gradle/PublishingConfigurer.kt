@@ -6,20 +6,18 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 
 /**
- * Applies the `maven-publish` plugin and ensures a `mavenJava` publication
- * exists for the `java` software component when the project produces one.
+ * Ensures a `mavenJava` publication exists for the `java` software component
+ * when the project has both `maven-publish` applied and a `java` component.
  *
- * Mirrors the legacy `octopus-rm-gradle-plugin` behavior of registering a
- * default `mavenJava` publication, but without the rm-plugin's `nexus`
- * property guard (consumer-side Sonatype is intentionally removed).
+ * Does NOT apply `maven-publish` itself — the consumer is
+ * responsible for applying `maven-publish`. If `maven-publish` is never
+ * applied, this configurer is a no-op.
  */
 object PublishingConfigurer {
 
     private const val DEFAULT_PUBLICATION_NAME = "mavenJava"
 
     fun configure(project: Project) {
-        project.pluginManager.apply(MavenPublishPlugin::class.java)
-
         project.plugins.withType(MavenPublishPlugin::class.java) {
             project.afterEvaluate { afterEvalProject ->
                 val javaComponent = afterEvalProject.components.findByName("java") ?: return@afterEvaluate

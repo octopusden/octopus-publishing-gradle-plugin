@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
  * <ul>
  *   <li>Register the {@code octopusPublishing} extension.</li>
  *   <li>Apply {@code com.jfrog.artifactory} to the root project and every
- *       subproject (parity with rm-plugin's {@code setupRootPublishing}).</li>
+ *       subproject (parity with RM plugin's {@code setupRootPublishing}).</li>
  *   <li>Delegate the actual {@code maven-publish}, POM customization and
  *       Artifactory configuration to the Kotlin {@code *Configurer} classes.</li>
  * </ul>
@@ -38,13 +38,11 @@ class OctopusPublishingPlugin implements Plugin<Project> {
             return
         }
 
-        // Option A (rm-plugin parity): configure publishing/POM/Artifactory on
-        // root + every subproject. Projects without maven-publish are no-ops;
-        // projects with com.jfrog.artifactory but no maven-publish get their
-        // artifactoryPublish task skipped so the build does not fail.
+        // Configure publishing on root + every subproject.
+        // Projects without maven-publish are no-ops;
+        // Projects with com.jfrog.artifactory but no maven-publish get their artifactoryPublish task skipped so the build does not fail.
         project.rootProject.allprojects { Project p ->
             PublishingConfigurer.INSTANCE.configure(p)
-            PomCustomizer.INSTANCE.configure(p, extension)
             ArtifactoryConfigurer.configure(p, extension)
         }
 
@@ -56,6 +54,9 @@ class OctopusPublishingPlugin implements Plugin<Project> {
         if (!rootProject.hasProperty('setupOctopusPublishing')) {
             rootProject.ext.setupOctopusPublishing = true
             rootProject.pluginManager.apply(ArtifactoryConfigurer.ARTIFACTORY_PLUGIN_ID)
+            // RM plugin parity: auto-apply maven-publish to the root project
+            // (subprojects must apply it themselves).
+            rootProject.pluginManager.apply('maven-publish')
             rootProject.subprojects { Project subProject ->
                 subProject.pluginManager.apply(ArtifactoryConfigurer.ARTIFACTORY_PLUGIN_ID)
             }

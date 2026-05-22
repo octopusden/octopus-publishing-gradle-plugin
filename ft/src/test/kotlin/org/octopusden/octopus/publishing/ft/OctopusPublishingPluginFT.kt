@@ -15,7 +15,7 @@ import java.util.UUID
  * FT for the octopus-publishing-gradle-plugin. Covers the scenarios decided
  * during planning:
  *
- * 1. POM customization (`pomDefaults { … }` flows into the generated POM)
+ * 1. Per-publication `pom { … }` (vanilla maven-publish) flows into the generated POM
  * 2. Credential resolution (env vs project-property precedence)
  * 3. Repo-key selection (`publishToReleaseRepository` flag)
  * 4. Real artifact upload to Artifactory (env-gated)
@@ -23,11 +23,11 @@ import java.util.UUID
 class OctopusPublishingPluginFT {
 
     // --------------------------------------------------------------------
-    // 1. POM CUSTOMIZATION
+    // 1. POM CUSTOMIZATION (consumer-side `pom { … }` block)
     // --------------------------------------------------------------------
 
     @Test
-    @DisplayName("pomDefaults block populates name/description/url/licenses/scm/developers in the generated POM")
+    @DisplayName("consumer-side `pom { … }` block populates name/description/url/licenses/scm/developers in the generated POM")
     fun testPomCustomization() {
         val result = runGradle {
             testProjectName = "simple-publish"

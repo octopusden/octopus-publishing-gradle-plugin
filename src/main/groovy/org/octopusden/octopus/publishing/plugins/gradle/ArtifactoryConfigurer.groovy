@@ -84,7 +84,7 @@ class ArtifactoryConfigurer {
                     }
                 }
             } else {
-                // rm-plugin parity: project has com.jfrog.artifactory applied
+                // RM plugin parity: project has com.jfrog.artifactory applied
                 // (via setupRootPublishing) but no maven-publish — tell the
                 // JFrog plugin to skip this project's contribution to the
                 // build-info / deploy step so the aggregate artifactoryDeploy

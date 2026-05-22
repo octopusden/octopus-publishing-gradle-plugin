@@ -8,17 +8,16 @@ import org.xmlunit.assertj3.XmlAssert
 import java.nio.file.Files
 
 /**
- * Verifies Option-A multi-project parity with rm-plugin:
+ * Verifies Option-A multi-project parity with RM plugin:
  *   - plugin applied only at the root configures EVERY subproject;
  *   - each subproject gets a mavenJava publication generated from `java`;
- *   - each subproject's POM carries the shared `pomDefaults`;
  *   - `publish` depends on `artifactoryPublish` per subproject (verified
- *     through `tasks --all` output when Artifactory is configured).
+ *     through `--dry-run --info` output when Artifactory is configured).
  */
 class MultiModulePublishFT {
 
     @Test
-    @DisplayName("plugin applied at root generates POMs in every subproject with shared pomDefaults")
+    @DisplayName("plugin applied at root generates POMs in every subproject")
     fun testPomsGeneratedInEverySubproject() {
         val result = runGradle {
             testProjectName = "multi-module-publish"
@@ -37,12 +36,6 @@ class MultiModulePublishFT {
             val pom = String(Files.readAllBytes(pomPath))
             XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:artifactId")
                 .isEqualTo(sub)
-            XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:url")
-                .isEqualTo("https://example.com/multi-module")
-            XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:licenses/p:license/p:name")
-                .isEqualTo("Apache-2.0")
-            XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:scm/p:url")
-                .isEqualTo("https://example.com/multi-module.git")
         }
     }
 

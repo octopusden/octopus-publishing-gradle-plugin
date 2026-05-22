@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Root has the plugin but no `java` component (no publication); two
- * java-library subprojects do publish. Verifies rm-plugin parity:
+ * java-library subprojects do publish. Verifies RM plugin parity:
  *   - root's `artifactoryPublish` is disabled (no failure);
  *   - subprojects publish normally.
  */
@@ -28,14 +28,15 @@ class RootOnlyNoPublishFT {
         }
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
         val joined = result.stdout.joinToString("\n")
-        // Root has no `java` component, so the JFrog plugin reports nothing to publish.
-        // The important assertion is that the build configures cleanly and is scheduled.
+        // Root has `maven-publish` (auto-applied by the plugin) but no `java`
+        // component, so no publication is created. JFrog logs the no-match
+        // message and the build succeeds.
         assertThat(joined).contains("None of the specified publications matched for project ':'")
         assertThat(joined).contains(":artifactoryPublish")
     }
 
     @Test
-    @DisplayName("subprojects with maven-publish produce POMs with shared pomDefaults")
+    @DisplayName("subprojects with maven-publish produce POMs")
     fun testSubprojectsPublishNormally() {
         val result = runGradle {
             testProjectName = "root-only-no-publish"
@@ -52,7 +53,6 @@ class RootOnlyNoPublishFT {
             assertThat(pomPath).`as`("POM for $sub").exists()
             val pom = String(java.nio.file.Files.readAllBytes(pomPath))
             assertThat(pom).contains("<artifactId>$sub</artifactId>")
-            assertThat(pom).contains("https://example.com/root-only")
         }
     }
 }
