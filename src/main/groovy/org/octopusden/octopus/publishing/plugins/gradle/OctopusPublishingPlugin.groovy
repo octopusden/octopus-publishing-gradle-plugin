@@ -39,12 +39,11 @@ class OctopusPublishingPlugin implements Plugin<Project> {
             return
         }
 
-        // Configure publishing on root + every subproject.
-        // Projects without maven-publish are no-ops;
-        // Projects with com.jfrog.artifactory but no maven-publish get their artifactoryPublish task skipped so the build does not fail.
+        ArtifactoryConfigurer.configureRoot(root, extension)
+
         root.allprojects { Project p ->
             PublishingConfigurer.INSTANCE.configure(p)
-            ArtifactoryConfigurer.configure(p, extension)
+            ArtifactoryConfigurer.configurePerProject(p)
         }
 
         OctopusPublishingExtensionKt.markPluginApplied(project)

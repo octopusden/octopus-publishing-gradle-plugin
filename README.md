@@ -131,6 +131,13 @@ publishing {
 - Projects without `maven-publish` get `artifactoryPublish.skip = true`
   (the JFrog plugin's own skip mechanism), so multi-module builds with
   non-publishing modules succeed.
+- The `artifactory { publish { … } }` DSL block (context URL, repo key,
+  credentials, `publishBuildInfo`) is configured on the **root project only**;
+  subprojects inherit it through their own `artifactoryPublish` tasks. This
+  mirrors `octopus-rm-gradle-plugin` and ensures the JFrog build-info JSON
+  contains module entries only for subprojects whose `artifactoryPublish`
+  actually runs (e.g. invoking `:subA:publish` produces a single-module
+  build-info, not one entry per configured subproject).
 
 ## Functional tests
 

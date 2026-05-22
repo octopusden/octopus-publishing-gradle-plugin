@@ -7,9 +7,18 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * Configures the {@code com.jfrog.artifactory} plugin: context URL, repository
- * key (selected via {@code publishToReleaseRepository}), credentials, and
- * wires {@code publish} to depend on {@code artifactoryPublish}.
+ * Configures the {@code com.jfrog.artifactory} plugin.
+ *
+ * <p>Split into two entry points to mirror the RM plugin and keep build-info
+ * JSON limited to actually-published modules:
+ * <ul>
+ *   <li>{@link #configureRoot} sets the {@code artifactory { publish { ... } }} DSL
+ *       on the root project only (context URL, repo key, credentials,
+ *       {@code publishBuildInfo}). Subprojects inherit this via the JFrog plugin.</li>
+ *   <li>{@link #configurePerProject} performs per-project wiring:
+ *       {@code publish.dependsOn(artifactoryPublish)} when {@code maven-publish}
+ *       is present, or {@code artifactoryPublish.skip = true} otherwise.</li>
+ * </ul>
  *
  * <p>Resolution order:
  * <ul>
@@ -33,23 +42,30 @@ class ArtifactoryConfigurer {
     static final String PUBLISH_RELEASE_PROP = 'publishToReleaseRepository'
     static final String ARTIFACTORY_PLUGIN_ID = 'com.jfrog.artifactory'
 
-    static void configure(Project project, OctopusPublishingExtension extension) {
-        def baseUrl = System.getenv(URL_ENV) ?: project.findProperty(URL_PROP)?.toString()
+    /**
+     * Configure the {@code artifactory { publish { ... } }} block on the ROOT project
+     * only. Subprojects inherit this configuration through the JFrog plugin's
+     * per-project {@code artifactoryPublish} tasks. This mirrors the RM plugin and
+     * ensures the JFrog build-info JSON contains module entries only for
+     * subprojects whose {@code artifactoryPublish} actually runs.
+     */
+    static void configureRoot(Project rootProject, OctopusPublishingExtension extension) {
+        def baseUrl = System.getenv(URL_ENV) ?: rootProject.findProperty(URL_PROP)?.toString()
         if (baseUrl == null || baseUrl.isBlank()) {
             LOGGER.info("Artifactory URL is not provided, configuration of {} is skipped", ARTIFACTORY_PLUGIN_ID)
             return
         }
 
-        def username = System.getenv(USER_ENV) ?: project.findProperty(USER_ENV)?.toString()
-        def password = System.getenv(PASS_ENV) ?: project.findProperty(PASS_ENV)?.toString()
+        def username = System.getenv(USER_ENV) ?: rootProject.findProperty(USER_ENV)?.toString()
+        def password = System.getenv(PASS_ENV) ?: rootProject.findProperty(PASS_ENV)?.toString()
 
-        def releaseFlag = project.rootProject.findProperty(PUBLISH_RELEASE_PROP)?.toString() ?:
+        def releaseFlag = rootProject.findProperty(PUBLISH_RELEASE_PROP)?.toString() ?:
                 System.getProperty(PUBLISH_RELEASE_PROP, System.getenv(PUBLISH_RELEASE_PROP))
         def publishToRelease = 'true'.equalsIgnoreCase(releaseFlag)
         def repoKey = publishToRelease ? extension.releaseRepoKey.get() : extension.devRepoKey.get()
         LOGGER.info("Configuring Artifactory publish: contextUrl={}/artifactory, repoKey={}", baseUrl, repoKey)
 
-        project.artifactory {
+        rootProject.artifactory {
             publish {
                 contextUrl = "${baseUrl}/artifactory" as String
                 repository {
@@ -69,7 +85,15 @@ class ArtifactoryConfigurer {
                 publishBuildInfo = true
             }
         }
+    }
 
+    /**
+     * Per-project wiring: hook {@code publish} to {@code artifactoryPublish} when
+     * {@code maven-publish} is present; otherwise mark {@code artifactoryPublish.skip = true}
+     * so the aggregate deploy does not fail. Does NOT touch the
+     * {@code artifactory { publish { ... } }} DSL — that is set on the root only.
+     */
+    static void configurePerProject(Project project) {
         project.afterEvaluate { Project p ->
             if (p.pluginManager.findPlugin('maven-publish')) {
                 def publishTask = p.tasks.findByName('publish')

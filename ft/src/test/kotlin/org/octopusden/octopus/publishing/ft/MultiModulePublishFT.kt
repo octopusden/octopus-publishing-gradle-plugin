@@ -60,4 +60,39 @@ class MultiModulePublishFT {
         assertThat(joined).contains(":sub-a:publish")
         assertThat(joined).contains(":sub-b:publish")
     }
+
+    @Test
+    @DisplayName("artifactory { publish { ... } } DSL is configured on root only; invoking one subproject's publish does not schedule sibling artifactoryPublish")
+    fun testArtifactoryConfiguredOnRootOnly() {
+        val result = runGradle {
+            testProjectName = "multi-module-publish"
+            // Invoke publish only on sub-a. With root-only artifactory DSL
+            // configuration (RM parity), only sub-a's artifactoryPublish must
+            // appear in the task graph; sub-b's must NOT.
+            tasks = listOf(":sub-a:publish", "--dry-run", "--info")
+            additionalEnvVariables = mapOf(
+                "ARTIFACTORY_URL" to "https://artifactory.example.invalid",
+                "ARTIFACTORY_DEPLOYER_USERNAME" to "u",
+                "ARTIFACTORY_DEPLOYER_PASSWORD" to "p",
+            )
+        }
+        assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
+
+        val joined = result.stdout.joinToString("\n")
+        // sub-a is the invoked target.
+        assertThat(joined).contains(":sub-a:artifactoryPublish")
+        assertThat(joined).contains(":sub-a:publish")
+        // sub-b's artifactoryPublish must NOT be scheduled — verifies that we
+        // do not configure the artifactory.publish DSL per-subproject.
+        assertThat(joined).doesNotContain(":sub-b:artifactoryPublish")
+        assertThat(joined).doesNotContain(":sub-b:publish")
+        // The root-level "Configuring Artifactory publish" log line should appear
+        // exactly once (root project only), not once per subproject.
+        val configureLogCount = result.stdout.count { it.contains("Configuring Artifactory publish:") }
+        assertEquals(
+            1,
+            configureLogCount,
+            "expected 'Configuring Artifactory publish' to be logged exactly once (root only), got $configureLogCount"
+        )
+    }
 }
