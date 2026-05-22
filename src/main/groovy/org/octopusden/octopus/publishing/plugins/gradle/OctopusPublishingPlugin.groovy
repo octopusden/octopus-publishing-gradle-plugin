@@ -21,6 +21,7 @@ class OctopusPublishingPlugin implements Plugin<Project> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OctopusPublishingPlugin.class)
     static final String EXTENSION_NAME = "octopusPublishing"
+    private static final String SETUP_MARKER = "setupOctopusPublishing"
 
     @Override
     void apply(Project project) {
@@ -51,8 +52,9 @@ class OctopusPublishingPlugin implements Plugin<Project> {
 
     private static void setupRootPublishing(Project project) {
         def rootProject = project.rootProject
-        if (!rootProject.hasProperty('setupOctopusPublishing')) {
-            rootProject.ext.setupOctopusPublishing = true
+        def rootExtras = rootProject.extensions.extraProperties
+        if (!rootExtras.has(SETUP_MARKER)) {
+            rootExtras.set(SETUP_MARKER, true)
             rootProject.pluginManager.apply(ArtifactoryConfigurer.ARTIFACTORY_PLUGIN_ID)
             // RM plugin parity: auto-apply maven-publish to the root project
             // (subprojects must apply it themselves).

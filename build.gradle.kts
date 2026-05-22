@@ -21,11 +21,11 @@ repositories {
 }
 
 dependencies {
-    implementation("com.jfrog.artifactory:com.jfrog.artifactory.gradle.plugin:${project.extra["com-jfrog-artifactory.version"]}")
+    implementation("com.jfrog.artifactory:com.jfrog.artifactory.gradle.plugin:${project.property("com-jfrog-artifactory.version")}")
 
-    testImplementation(platform("org.junit:junit-bom:${project.extra["junit-jupiter.version"]}"))
+    testImplementation(platform("org.junit:junit-bom:${project.property("junit-jupiter.version")}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.assertj:assertj-core:${project.extra["assertj.version"]}")
+    testImplementation("org.assertj:assertj-core:${project.property("assertj.version")}")
 }
 
 java {

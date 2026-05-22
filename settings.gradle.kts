@@ -1,8 +1,8 @@
 pluginManagement {
     plugins {
-        kotlin("jvm") version settings.extra["kotlin.version"] as String
-        id("io.github.gradle-nexus.publish-plugin") version settings.extra["nexus-plugin.version"] as String
-        id("com.jfrog.artifactory") version settings.extra["com-jfrog-artifactory.version"] as String
+        kotlin("jvm") version settings.providers.gradleProperty("kotlin.version")
+        id("io.github.gradle-nexus.publish-plugin") version settings.providers.gradleProperty("nexus-plugin.version")
+        id("com.jfrog.artifactory") version settings.providers.gradleProperty("com-jfrog-artifactory.version")
     }
 }
 

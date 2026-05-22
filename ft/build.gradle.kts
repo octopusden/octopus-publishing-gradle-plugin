@@ -14,15 +14,15 @@ repositories {
 }
 
 dependencies {
-    implementation("com.platformlib:platformlib-process-local:${project.extra["platformlib-process.version"]}")
-    implementation("org.slf4j:slf4j-api:${project.extra["slf4j.version"]}")
+    implementation("com.platformlib:platformlib-process-local:${project.property("platformlib-process.version")}")
+    implementation("org.slf4j:slf4j-api:${project.property("slf4j.version")}")
 
-    testImplementation(platform("org.junit:junit-bom:${project.extra["junit-jupiter.version"]}"))
+    testImplementation(platform("org.junit:junit-bom:${project.property("junit-jupiter.version")}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:${project.extra["assertj.version"]}")
-    testImplementation("org.xmlunit:xmlunit-assertj3:${project.extra["xmlunit.version"]}")
-    testRuntimeOnly("ch.qos.logback:logback-classic:${project.extra["logback.version"]}")
+    testImplementation("org.assertj:assertj-core:${project.property("assertj.version")}")
+    testImplementation("org.xmlunit:xmlunit-assertj3:${project.property("xmlunit.version")}")
+    testRuntimeOnly("ch.qos.logback:logback-classic:${project.property("logback.version")}")
 }
 
 kotlin {
