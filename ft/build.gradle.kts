@@ -16,7 +16,7 @@ repositories {
 dependencies {
     implementation("com.platformlib:platformlib-process-local:${project.extra["platformlib-process.version"]}")
     implementation("org.slf4j:slf4j-api:${project.extra["slf4j.version"]}")
-    implementation(project(":artifactory-manager"))
+    implementation(project(":ft:artifactory-manager"))
 
     testImplementation(platform("org.junit:junit-bom:${project.extra["junit-jupiter.version"]}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -31,10 +31,11 @@ kotlin {
 }
 
 tasks.test {
+    dependsOn(rootProject.tasks.named("publishToMavenLocal"))
     useJUnitPlatform()
     val pluginVersion = providers.gradleProperty("octopus-publishing.version")
         .orElse(providers.environmentVariable("OCTOPUS_PUBLISHING_VERSION"))
-        .getOrElse("1.0-SNAPSHOT")
+        .getOrElse(rootProject.version.toString())
     environment("OCTOPUS_PUBLISHING_VERSION", pluginVersion)
     systemProperty("octopus-publishing.version", pluginVersion)
     testLogging.showStandardStreams = true

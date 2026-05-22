@@ -150,13 +150,14 @@ packaged test projects via `platformlib-process-local`:
 | End-to-end upload to a real Artifactory | `OctopusPublishingPluginFT.testRealUpload` *(env-gated)* |
 | Multi-module: root applies, every subproject publishes | `MultiModulePublishFT` |
 | Root without publication: subprojects still publish, no failure | `RootOnlyNoPublishFT` |
+| Root with `java-library` but no explicit `maven-publish`: plugin auto-applies and publishes root | `RootWithJavaNoMavenPublishFT` |
 | Idempotency: plugin applied on root + subproject | `IdempotencyFT` |
 
-Run the unit-style FTs:
+Run the unit-style FTs (FT now runs as part of the standard `build`):
 
 ```bash
-./gradlew publishToMavenLocal
-cd ft && ./gradlew test
+./gradlew clean build                # builds the plugin AND runs the FT suite
+./gradlew :ft:test                   # FT only (depends on :publishToMavenLocal)
 ```
 
 Run the real-upload FT (requires a real Artifactory):
@@ -166,7 +167,7 @@ export ARTIFACTORY_URL=https://artifactory.example.com
 export ARTIFACTORY_DEPLOYER_USERNAME=...
 export ARTIFACTORY_DEPLOYER_PASSWORD=...
 export ARTIFACTORY_FT_REPO_KEY=rnd-maven-dev-local   # optional, defaults shown
-cd ft && ./gradlew test --tests '*testRealUpload'
+./gradlew :ft:test --tests '*testRealUpload'
 ```
 
 ---
