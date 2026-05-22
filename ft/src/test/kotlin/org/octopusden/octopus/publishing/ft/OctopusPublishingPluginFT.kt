@@ -129,4 +129,26 @@ class OctopusPublishingPluginFT {
         val joined = result.stdout.joinToString("\n")
         assertThat(joined).contains("repoKey=$expectedRepoKey")
     }
+
+    @ParameterizedTest(name = "custom extension repoKey: publishToReleaseRepository={0} → repoKey={1}")
+    @CsvSource(
+        ",     my-custom-dev",      // unset → dev → custom dev key from extension
+        "true, my-custom-release",  // release → custom release key from extension
+    )
+    @DisplayName("custom devRepoKey / releaseRepoKey from octopusPublishing { … } are honored (regression: configureRoot must defer until afterEvaluate)")
+    fun testCustomRepoKeyFromExtension(flag: String?, expectedRepoKey: String) {
+        val props = mutableMapOf<String, String>()
+        flag?.takeIf { it.isNotBlank() }?.let { props["publishToReleaseRepository"] = it.trim() }
+
+        val result = runGradle {
+            testProjectName = "custom-repo-key"
+            tasks = listOf("help", "--info")
+            additionalEnvVariables = mapOf("ARTIFACTORY_URL" to "https://artifactory.example.invalid")
+            additionalProperties = props
+        }
+        assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
+
+        val joined = result.stdout.joinToString("\n")
+        assertThat(joined).contains("repoKey=$expectedRepoKey")
+    }
 }

@@ -49,39 +49,41 @@ class ArtifactoryConfigurer {
      * subprojects whose {@code artifactoryPublish} actually runs.
      */
     static void configureRoot(Project rootProject, OctopusPublishingExtension extension) {
-        def baseUrl = System.getenv(URL_ENV) ?: rootProject.findProperty(URL_PROP)?.toString()
-        if (baseUrl == null || baseUrl.isBlank()) {
-            LOGGER.info("Artifactory URL is not provided, configuration of {} is skipped", ARTIFACTORY_PLUGIN_ID)
-            return
-        }
+        rootProject.afterEvaluate {
+            def baseUrl = System.getenv(URL_ENV) ?: rootProject.findProperty(URL_PROP)?.toString()
+            if (baseUrl == null || baseUrl.isBlank()) {
+                LOGGER.info("Artifactory URL is not provided, configuration of {} is skipped", ARTIFACTORY_PLUGIN_ID)
+                return
+            }
 
-        def username = System.getenv(USER_ENV) ?: rootProject.findProperty(USER_ENV)?.toString()
-        def password = System.getenv(PASS_ENV) ?: rootProject.findProperty(PASS_ENV)?.toString()
+            def username = System.getenv(USER_ENV) ?: rootProject.findProperty(USER_ENV)?.toString()
+            def password = System.getenv(PASS_ENV) ?: rootProject.findProperty(PASS_ENV)?.toString()
 
-        def releaseFlag = rootProject.findProperty(PUBLISH_RELEASE_PROP)?.toString() ?:
-                System.getProperty(PUBLISH_RELEASE_PROP, System.getenv(PUBLISH_RELEASE_PROP))
-        def publishToRelease = 'true'.equalsIgnoreCase(releaseFlag)
-        def repoKey = publishToRelease ? extension.releaseRepoKey.get() : extension.devRepoKey.get()
-        LOGGER.info("Configuring Artifactory publish: contextUrl={}/artifactory, repoKey={}", baseUrl, repoKey)
+            def releaseFlag = rootProject.findProperty(PUBLISH_RELEASE_PROP)?.toString() ?:
+                    System.getProperty(PUBLISH_RELEASE_PROP, System.getenv(PUBLISH_RELEASE_PROP))
+            def publishToRelease = 'true'.equalsIgnoreCase(releaseFlag)
+            def repoKey = publishToRelease ? extension.releaseRepoKey.get() : extension.devRepoKey.get()
+            LOGGER.info("Configuring Artifactory publish: contextUrl={}/artifactory, repoKey={}", baseUrl, repoKey)
 
-        rootProject.artifactory {
-            publish {
-                contextUrl = "${baseUrl}/artifactory" as String
-                repository {
-                    delegate.repoKey = repoKey
-                    if (username != null) {
-                        delegate.username = username
+            rootProject.artifactory {
+                publish {
+                    contextUrl = "${baseUrl}/artifactory" as String
+                    repository {
+                        delegate.repoKey = repoKey
+                        if (username != null) {
+                            delegate.username = username
+                        }
+                        if (password != null) {
+                            delegate.password = password
+                        }
                     }
-                    if (password != null) {
-                        delegate.password = password
+                    defaults {
+                        publications('ALL_PUBLICATIONS')
+                        publishPom = true
+                        publishArtifacts = true
                     }
+                    publishBuildInfo = true
                 }
-                defaults {
-                    publications('ALL_PUBLICATIONS')
-                    publishPom = true
-                    publishArtifacts = true
-                }
-                publishBuildInfo = true
             }
         }
     }
