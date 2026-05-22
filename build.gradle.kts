@@ -75,7 +75,7 @@ gradlePlugin {
 
 artifactory {
     publish {
-        val baseUrl = System.getenv().getOrDefault("ARTIFACTORY_URL", project.properties["artifactoryUrl"])
+        val baseUrl = System.getenv("ARTIFACTORY_URL") ?: (project.properties["artifactoryUrl"] as? String)
         if (baseUrl != null) {
             contextUrl = "$baseUrl/artifactory"
         }

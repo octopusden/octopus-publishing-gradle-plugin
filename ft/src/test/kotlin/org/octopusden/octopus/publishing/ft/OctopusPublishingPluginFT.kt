@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.xmlunit.assertj3.XmlAssert
 import java.nio.file.Files
+import java.util.UUID
 
 /**
  * FT for the octopus-publishing-gradle-plugin. Covers the scenarios decided
@@ -63,14 +64,15 @@ class OctopusPublishingPluginFT {
     fun testCredentialResolution(source: String) {
         val envVars = mutableMapOf("ARTIFACTORY_URL" to "https://artifactory.example.invalid")
         val props = mutableMapOf<String, String>()
+        val fakePassword = "test-" + UUID.randomUUID().toString()
         when (source) {
             "env" -> {
                 envVars["ARTIFACTORY_DEPLOYER_USERNAME"] = "env-user"
-                envVars["ARTIFACTORY_DEPLOYER_PASSWORD"] = "env-pass"
+                envVars["ARTIFACTORY_DEPLOYER_PASSWORD"] = fakePassword
             }
             "property" -> {
                 props["ARTIFACTORY_DEPLOYER_USERNAME"] = "prop-user"
-                props["ARTIFACTORY_DEPLOYER_PASSWORD"] = "prop-pass"
+                props["ARTIFACTORY_DEPLOYER_PASSWORD"] = fakePassword
             }
         }
 

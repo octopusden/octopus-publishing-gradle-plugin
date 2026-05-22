@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "org.octopusden.publishing.ft.rootjava"
-version = "1.0-SNAPSHOT"
+version = (project.findProperty("buildVersion") as? String) ?: "1.0-SNAPSHOT"
 
 java {
     toolchain {

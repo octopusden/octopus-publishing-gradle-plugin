@@ -26,9 +26,10 @@ class OctopusPublishingPlugin implements Plugin<Project> {
     void apply(Project project) {
         LOGGER.info("Applying octopus-publishing-gradle-plugin to {}", project)
 
-        def extension = project.extensions.findByName(EXTENSION_NAME) as OctopusPublishingExtension
+        def root = project.rootProject
+        def extension = root.extensions.findByName(EXTENSION_NAME) as OctopusPublishingExtension
         if (extension == null) {
-            extension = project.extensions.create(EXTENSION_NAME, OctopusPublishingExtension.class)
+            extension = root.extensions.create(EXTENSION_NAME, OctopusPublishingExtension.class)
         }
 
         setupRootPublishing(project)
@@ -41,7 +42,7 @@ class OctopusPublishingPlugin implements Plugin<Project> {
         // Configure publishing on root + every subproject.
         // Projects without maven-publish are no-ops;
         // Projects with com.jfrog.artifactory but no maven-publish get their artifactoryPublish task skipped so the build does not fail.
-        project.rootProject.allprojects { Project p ->
+        root.allprojects { Project p ->
             PublishingConfigurer.INSTANCE.configure(p)
             ArtifactoryConfigurer.configure(p, extension)
         }

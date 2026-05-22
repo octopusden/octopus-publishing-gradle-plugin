@@ -1,10 +1,8 @@
 # octopus-publishing-gradle-plugin
 
 Gradle plugin that configures **JFrog Artifactory** publishing for a consumer
-project. Distilled and modernised from
-[`octopus-rm-gradle-plugin`](../octopus-rm-gradle-plugin), keeping the same
-behavior, but stripping
-out everything unrelated to JFrog publishing.
+project. Distilled and modernized from octopus-rm-gradle-plugin, keeping the same
+behavior, but stripping out everything unrelated to JFrog publishing.
 
 ## Requirements
 

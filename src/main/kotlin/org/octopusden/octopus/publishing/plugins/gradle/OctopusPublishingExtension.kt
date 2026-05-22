@@ -34,4 +34,4 @@ fun Project.markPluginApplied() {
 }
 
 fun Project.isPluginAlreadyApplied(): Boolean =
-    rootProject.hasProperty(PLUGIN_STATE_PROPERTY)
+    rootProject.extensions.extraProperties.has(PLUGIN_STATE_PROPERTY)

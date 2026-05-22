@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.octopusden.publishing.ft.consumer"
-version = (project.findProperty("buildVersion") as String?) ?: "1.0-SNAPSHOT"
+version = (project.findProperty("buildVersion") as? String) ?: "1.0-SNAPSHOT"
 description = "Simple publishing FT consumer project"
 
 java {
