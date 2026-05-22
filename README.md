@@ -15,7 +15,7 @@ behavior, but stripping out everything unrelated to JFrog publishing.
 
 ## What the plugin does
 
-When applied to a project (typically the root), it walks `rootProject.allprojects { … }`
+Apply this plugin on the **root project**. It walks `rootProject.allprojects { … }`
 and, for each project:
 
 1. Creates a default `mavenJava` `MavenPublication` from the `java`
@@ -42,7 +42,7 @@ component) are left untouched: their `artifactoryPublish` task is marked
 ## Applying the plugin
 
 ```kotlin
-// build.gradle.kts (root or any publishing subproject)
+// build.gradle.kts (root project)
 plugins {
     id("org.octopusden.octopus-publishing")
 }
@@ -128,6 +128,11 @@ publishing {
 - The plugin walks `rootProject.allprojects` once on first apply and is
   idempotent: applying the id again (in a subproject) is a no-op guarded
   by an extra-property marker on the root project.
+- **Apply on the root project.** Applying the id from a subproject is
+  tolerated for back-compat — it resolves `project.rootProject` and bootstraps
+  the same global setup there, so the effect is identical to a root apply —
+  but root-only is the supported, documented pattern. Do not expect
+  subproject application to scope the configuration to that subproject only.
 - Projects without `maven-publish` get `artifactoryPublish.skip = true`
   (the JFrog plugin's own skip mechanism), so multi-module builds with
   non-publishing modules succeed.
