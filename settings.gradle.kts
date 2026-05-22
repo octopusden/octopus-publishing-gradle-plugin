@@ -8,4 +8,4 @@ pluginManagement {
 
 rootProject.name = "octopus-publishing-gradle-plugin"
 
-include("ft", "ft:artifactory-manager")
+include("ft")

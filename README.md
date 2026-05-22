@@ -147,7 +147,6 @@ packaged test projects via `platformlib-process-local`:
 | Credential resolution (env vs project property) | `OctopusPublishingPluginFT.testCredentialResolution` |
 | Skip when URL missing | `OctopusPublishingPluginFT.testArtifactorySkippedWhenUrlMissing` |
 | Repo-key selection via `publishToReleaseRepository` | `OctopusPublishingPluginFT.testRepoKeySelection` |
-| End-to-end upload to a real Artifactory | `OctopusPublishingPluginFT.testRealUpload` *(env-gated)* |
 | Multi-module: root applies, every subproject publishes | `MultiModulePublishFT` |
 | Root without publication: subprojects still publish, no failure | `RootOnlyNoPublishFT` |
 | Root with `java-library` but no explicit `maven-publish`: plugin auto-applies and publishes root | `RootWithJavaNoMavenPublishFT` |
@@ -158,16 +157,6 @@ Run the unit-style FTs (FT now runs as part of the standard `build`):
 ```bash
 ./gradlew clean build                # builds the plugin AND runs the FT suite
 ./gradlew :ft:test                   # FT only (depends on :publishToMavenLocal)
-```
-
-Run the real-upload FT (requires a real Artifactory):
-
-```bash
-export ARTIFACTORY_URL=https://artifactory.example.com
-export ARTIFACTORY_DEPLOYER_USERNAME=...
-export ARTIFACTORY_DEPLOYER_PASSWORD=...
-export ARTIFACTORY_FT_REPO_KEY=rnd-maven-dev-local   # optional, defaults shown
-./gradlew :ft:test --tests '*testRealUpload'
 ```
 
 ---
@@ -205,7 +194,7 @@ export ARTIFACTORY_FT_REPO_KEY=rnd-maven-dev-local   # optional, defaults shown
 | Consumer version property | n/a | `octopus-publishing.version` (matches `octopus-oc-template.version` convention) |
 | Plugin marker `displayName` / `description` | Hardcoded strings | Derived from `project.name` / `project.description` |
 | Idempotency flag | `setupArtifactoryPublish` + `releaseManagementConfigurationState` | `setupOctopusPublishing` + `octopusPublishingConfigurationState` |
-| FT layout | `ft/` Groovy DSL with `artifactory-manager` Kotlin subproject | `ft/` **Kotlin DSL** with a slimmer `artifactory-manager` subproject |
+| FT layout | `ft/` Groovy DSL with `artifactory-manager` Kotlin subproject | `ft/` **Kotlin DSL** subproject of the main build |
 | FT coverage of JFrog publishing | None | `OctopusPublishingPluginFT` + `MultiModulePublishFT` + `RootOnlyNoPublishFT` + `IdempotencyFT` |
 
 ### Removed

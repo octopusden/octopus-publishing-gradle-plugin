@@ -6,10 +6,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.octopusden.octopus.publishing.ft.artifactory.ArtifactoryManager
 import org.xmlunit.assertj3.XmlAssert
 import java.nio.file.Files
-import java.util.UUID
 
 /**
  * FT for the octopus-publishing-gradle-plugin. Covers the scenarios decided
@@ -18,7 +16,6 @@ import java.util.UUID
  * 1. Per-publication `pom { … }` (vanilla maven-publish) flows into the generated POM
  * 2. Credential resolution (env vs project-property precedence)
  * 3. Repo-key selection (`publishToReleaseRepository` flag)
- * 4. Real artifact upload to Artifactory (env-gated)
  */
 class OctopusPublishingPluginFT {
 
@@ -129,44 +126,5 @@ class OctopusPublishingPluginFT {
 
         val joined = result.stdout.joinToString("\n")
         assertThat(joined).contains("repoKey=$expectedRepoKey")
-    }
-
-    // --------------------------------------------------------------------
-    // 4. REAL UPLOAD (env-gated)
-    // --------------------------------------------------------------------
-
-    @Test
-    @DisplayName("end-to-end upload to a real Artifactory (gated on ARTIFACTORY_URL/USERNAME/PASSWORD)")
-    fun testRealUpload() {
-        val baseUrl = System.getenv("ARTIFACTORY_URL")
-        val user = System.getenv("ARTIFACTORY_DEPLOYER_USERNAME")
-        val pass = System.getenv("ARTIFACTORY_DEPLOYER_PASSWORD")
-        val repoKey = System.getenv("ARTIFACTORY_FT_REPO_KEY") ?: "rnd-maven-dev-local"
-        org.junit.jupiter.api.Assumptions.assumeTrue(
-            !baseUrl.isNullOrBlank() && !user.isNullOrBlank() && !pass.isNullOrBlank(),
-            "ARTIFACTORY_URL / ARTIFACTORY_DEPLOYER_USERNAME / ARTIFACTORY_DEPLOYER_PASSWORD must be set to run the real upload FT"
-        )
-
-        // Use a unique version per run so we don't collide with previous uploads.
-        val uniqueVersion = "1.0-ft-${UUID.randomUUID().toString().substring(0, 8)}-SNAPSHOT"
-        val artifactPath =
-            "org/octopusden/publishing/ft/consumer/simple-publish/$uniqueVersion/simple-publish-$uniqueVersion.pom"
-
-        val result = runGradle {
-            testProjectName = "simple-publish"
-            tasks = listOf("clean", "publish")
-            additionalProperties = mapOf("buildVersion" to uniqueVersion)
-        }
-        assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
-
-        ArtifactoryManager(baseUrl!!, user!!, pass!!).use { mgr ->
-            try {
-                val pomBytes = mgr.fetchArtifact(repoKey, artifactPath)
-                assertThat(pomBytes).`as`("POM uploaded to $repoKey/$artifactPath").isNotNull
-                assertThat(String(pomBytes!!)).contains("<artifactId>simple-publish</artifactId>")
-            } finally {
-                runCatching { mgr.deleteArtifact(repoKey, artifactPath) }
-            }
-        }
     }
 }

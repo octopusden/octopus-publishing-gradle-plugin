@@ -16,7 +16,6 @@ repositories {
 dependencies {
     implementation("com.platformlib:platformlib-process-local:${project.extra["platformlib-process.version"]}")
     implementation("org.slf4j:slf4j-api:${project.extra["slf4j.version"]}")
-    implementation(project(":ft:artifactory-manager"))
 
     testImplementation(platform("org.junit:junit-bom:${project.extra["junit-jupiter.version"]}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
