@@ -1,7 +1,6 @@
 package org.octopusden.octopus.publishing.plugins.gradle
 
 import org.gradle.api.Project
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
