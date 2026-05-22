@@ -3,17 +3,17 @@
 Gradle plugin that configures **JFrog Artifactory** publishing for a consumer
 project. Distilled and modernised from
 [`octopus-rm-gradle-plugin`](../octopus-rm-gradle-plugin), keeping the same
-behaviour, environment variables and POM-customization helper, but stripping
+behavior, but stripping
 out everything unrelated to JFrog publishing.
 
 ## Requirements
 
-| | Build | Consumer |
-| --- | --- | --- |
-| JDK | 21 (Gradle toolchain) | **17+** |
-| Gradle | 9.5.1 | **9.0+** |
-| Bytecode target | 17 | n/a |
-| JFrog Artifactory plugin | 6.0.4 | bundled by the plugin |
+|                          | Build                 | Consumer              |
+|--------------------------|-----------------------|-----------------------|
+| JDK                      | 21 (Gradle toolchain) | **17+**               |
+| Gradle                   | 9.5.1                 | **9.0+**              |
+| Bytecode target          | 17                    | n/a                   |
+| JFrog Artifactory plugin | 6.0.4                 | bundled by the plugin |
 
 ## What the plugin does
 
@@ -46,8 +46,6 @@ component) are left untouched: their `artifactoryPublish` task is marked
 ```kotlin
 // build.gradle.kts (root or any publishing subproject)
 plugins {
-    `java-library`
-    `maven-publish`
     id("org.octopusden.octopus-publishing")
 }
 ```
@@ -139,18 +137,7 @@ publishing {
 ## Functional tests
 
 The `ft/` subproject contains FTs that invoke a real Gradle build against
-packaged test projects via `platformlib-process-local`:
-
-| Scenario | Test class / method |
-| --- | --- |
-| Consumer-side `pom { … }` flows into the generated POM | `OctopusPublishingPluginFT.testPomCustomization` |
-| Credential resolution (env vs project property) | `OctopusPublishingPluginFT.testCredentialResolution` |
-| Skip when URL missing | `OctopusPublishingPluginFT.testArtifactorySkippedWhenUrlMissing` |
-| Repo-key selection via `publishToReleaseRepository` | `OctopusPublishingPluginFT.testRepoKeySelection` |
-| Multi-module: root applies, every subproject publishes | `MultiModulePublishFT` |
-| Root without publication: subprojects still publish, no failure | `RootOnlyNoPublishFT` |
-| Root with `java-library` but no explicit `maven-publish`: plugin auto-applies and publishes root | `RootWithJavaNoMavenPublishFT` |
-| Idempotency: plugin applied on root + subproject | `IdempotencyFT` |
+packaged test projects via `platformlib-process-local`.
 
 Run the unit-style FTs (FT now runs as part of the standard `build`):
 
@@ -165,37 +152,37 @@ Run the unit-style FTs (FT now runs as part of the standard `build`):
 
 ### Preserved (drop-in for the JFrog publishing surface)
 
-| Item | Notes                                                                                                                                                         |
-| --- |---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Env var `ARTIFACTORY_URL` | Same name & semantics.                                                                                                                                        |
+| Item                                                                       | Notes                                                                                                                                                         |
+|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Env var `ARTIFACTORY_URL`                                                  | Same name & semantics.                                                                                                                                        |
 | Env vars `ARTIFACTORY_DEPLOYER_USERNAME` / `ARTIFACTORY_DEPLOYER_PASSWORD` | Same names.                                                                                                                                                   |
-| Project property `artifactoryUrl` | Fallback for the URL env var.                                                                                                                                 |
-| Project property `publishToReleaseRepository` | Same flag, same effect.                                                                                                                                       |
-| Default repo keys `rnd-maven-dev-local` / `rnd-maven-release-local` | Now also overridable via the extension.                                                                                                                       |
-| Publication name `mavenJava` | Same publication name from `components.java`.                                                                                                                 |
-| `publish.dependsOn(artifactoryPublish)` task wiring | Same.                                                                                                                                                         |
-| `com.jfrog.artifactory` applied to root + every subproject | Same.                                                                                                                                                         |
-| Multi-project behaviour | Root apply configures every subproject; projects without `maven-publish` get `artifactoryPublish.skip = true`. Same as `setupProjectPublishing` in RM plugin. |
+| Project property `artifactoryUrl`                                          | Fallback for the URL env var.                                                                                                                                 |
+| Project property `publishToReleaseRepository`                              | Same flag, same effect.                                                                                                                                       |
+| Default repo keys `rnd-maven-dev-local` / `rnd-maven-release-local`        | Now also overridable via the extension.                                                                                                                       |
+| Publication name `mavenJava`                                               | Same publication name from `components.java`.                                                                                                                 |
+| `publish.dependsOn(artifactoryPublish)` task wiring                        | Same.                                                                                                                                                         |
+| `com.jfrog.artifactory` applied to root + every subproject                 | Same.                                                                                                                                                         |
+| Multi-project behaviour                                                    | Root apply configures every subproject; projects without `maven-publish` get `artifactoryPublish.skip = true`. Same as `setupProjectPublishing` in RM plugin. |
 
 ### Changed
 
-| Aspect | Before (`octopus-rm-gradle-plugin`) | Now (`octopus-publishing-gradle-plugin`) |
-| --- | --- | --- |
-| Build script DSL | Groovy (`build.gradle`) | **Kotlin** (`build.gradle.kts`) |
-| Source layout | Monolithic `ReleaseManagementGradlePlugin.groovy` (~300 lines) | Slim Groovy bootstrap + focused Kotlin/Groovy classes (`PublishingConfigurer`, `ArtifactoryConfigurer`) |
-| Repository keys | Hard-coded `rnd-maven-{dev,release}-local` | Configurable via `octopusPublishing { devRepoKey/releaseRepoKey }` (same defaults) |
-| Plugin id | `org.octopusden.octopus-release-management` | `org.octopusden.octopus-publishing` |
-| Extension name | (none — used Groovy metaClass tricks only) | `octopusPublishing { … }` |
-| Group | `org.octopusden.octopus-release-management` | `org.octopusden.octopus.publishing` |
-| Min Gradle | ~7.x | **9.0+** (built & tested against 9.5.1) |
-| JDK target | 17 (build & runtime) | Build **21** (toolchain), bytecode/runtime **17** |
-| JFrog Artifactory plugin | 4.x / 5.x | **6.0.4** |
-| Kotlin (build) | n/a | **2.2.0** |
-| Consumer version property | n/a | `octopus-publishing.version` (matches `octopus-oc-template.version` convention) |
-| Plugin marker `displayName` / `description` | Hardcoded strings | Derived from `project.name` / `project.description` |
-| Idempotency flag | `setupArtifactoryPublish` + `releaseManagementConfigurationState` | `setupOctopusPublishing` + `octopusPublishingConfigurationState` |
-| FT layout | `ft/` Groovy DSL with `artifactory-manager` Kotlin subproject | `ft/` **Kotlin DSL** subproject of the main build |
-| FT coverage of JFrog publishing | None | `OctopusPublishingPluginFT` + `MultiModulePublishFT` + `RootOnlyNoPublishFT` + `IdempotencyFT` |
+| Aspect                                      | Before (`octopus-rm-gradle-plugin`)                               | Now (`octopus-publishing-gradle-plugin`)                                                                |
+|---------------------------------------------|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| Build script DSL                            | Groovy (`build.gradle`)                                           | **Kotlin** (`build.gradle.kts`)                                                                         |
+| Source layout                               | Monolithic `ReleaseManagementGradlePlugin.groovy` (~300 lines)    | Slim Groovy bootstrap + focused Kotlin/Groovy classes (`PublishingConfigurer`, `ArtifactoryConfigurer`) |
+| Repository keys                             | Hard-coded `rnd-maven-{dev,release}-local`                        | Configurable via `octopusPublishing { devRepoKey/releaseRepoKey }` (same defaults)                      |
+| Plugin id                                   | `org.octopusden.octopus-release-management`                       | `org.octopusden.octopus-publishing`                                                                     |
+| Extension name                              | (none — used Groovy metaClass tricks only)                        | `octopusPublishing { … }`                                                                               |
+| Group                                       | `org.octopusden.octopus-release-management`                       | `org.octopusden.octopus.publishing`                                                                     |
+| Min Gradle                                  | ~7.x                                                              | **9.0+** (built & tested against 9.5.1)                                                                 |
+| JDK target                                  | 17 (build & runtime)                                              | Build **21** (toolchain), bytecode/runtime **17**                                                       |
+| JFrog Artifactory plugin                    | 4.x / 5.x                                                         | **6.0.4**                                                                                               |
+| Kotlin (build)                              | n/a                                                               | **2.2.0**                                                                                               |
+| Consumer version property                   | `octopus-release-management.version`                              | `octopus-publishing.version`                                                                            |
+| Plugin marker `displayName` / `description` | Hardcoded strings                                                 | Derived from `project.name` / `project.description`                                                     |
+| Idempotency flag                            | `setupArtifactoryPublish` + `releaseManagementConfigurationState` | `setupOctopusPublishing` + `octopusPublishingConfigurationState`                                        |
+| FT layout                                   | `ft/` Groovy DSL with `artifactory-manager` Kotlin subproject     | `ft/` **Kotlin DSL** subproject of the main build                                                       |
+| FT coverage of JFrog publishing             | None                                                              | `OctopusPublishingPluginFT` + `MultiModulePublishFT` + `RootOnlyNoPublishFT` + `IdempotencyFT`          |
 
 ### Removed
 

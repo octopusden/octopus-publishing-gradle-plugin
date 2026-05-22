@@ -17,22 +17,6 @@ import javax.inject.Inject
  *     releaseRepoKey.set("rnd-maven-release-local")
  * }
  * ```
- *
- * POM metadata (`name`, `url`, `licenses`, `scm`, `developers`) is configured
- * by the consumer the standard `maven-publish` way:
- *
- * ```
- * publishing {
- *     publications {
- *         named<MavenPublication>("mavenJava") {
- *             pom {
- *                 url.set("https://github.com/my-org/my-project")
- *                 licenses { license { name.set("Apache-2.0"); url.set("…") } }
- *             }
- *         }
- *     }
- * }
- * ```
  */
 abstract class OctopusPublishingExtension @Inject constructor(objects: ObjectFactory) {
 

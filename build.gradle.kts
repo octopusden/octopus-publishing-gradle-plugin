@@ -73,12 +73,6 @@ gradlePlugin {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Publishing of THIS plugin (JFrog + Sonatype + signing). Mirrors
-// octopus-oc-template-gradle-plugin. The plugin itself only configures JFrog
-// for its consumers — the dual publish here is for releasing the plugin.
-// ---------------------------------------------------------------------------
-
 artifactory {
     publish {
         val baseUrl = System.getenv().getOrDefault("ARTIFACTORY_URL", project.properties["artifactoryUrl"])
