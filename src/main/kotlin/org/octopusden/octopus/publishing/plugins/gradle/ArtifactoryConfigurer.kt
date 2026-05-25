@@ -36,11 +36,13 @@ object ArtifactoryConfigurer {
                 ?: System.getProperty(PUBLISH_RELEASE_PROP, System.getenv(PUBLISH_RELEASE_PROP))
             val publishToRelease = "true".equals(releaseFlag, ignoreCase = true)
             val repoKey = if (publishToRelease) extension.releaseRepoKey.get() else extension.devRepoKey.get()
-            LOGGER.info("Configuring Artifactory publish: contextUrl={}/artifactory, repoKey={}", baseUrl, repoKey)
+
+            val normalizedBaseUrl = baseUrl.removeSuffix("/").removeSuffix("/artifactory")
+            LOGGER.info("Configuring Artifactory publish: contextUrl={}/artifactory, repoKey={}", normalizedBaseUrl, repoKey)
 
             rootProject.extensions.configure(ArtifactoryPluginConvention::class.java) { convention ->
                 convention.publish { publisher ->
-                    publisher.contextUrl = "$baseUrl/artifactory"
+                    publisher.contextUrl = "$normalizedBaseUrl/artifactory"
                     publisher.repository { repo ->
                         repo.repoKey = repoKey
                         if (username != null) repo.username = username
