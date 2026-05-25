@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 
 /**
- * Applies `id("org.octopusden.octopus-publishing")` in BOTH the root and a
- * subproject. Verifies the idempotency guard prevents double configuration
- * and that the build still produces a correct POM exactly once.
+ * Applies `id("org.octopusden.octopus-publishing")` in both the root and a
+ * subproject; verifies the idempotency guard prevents double configuration.
  */
 class IdempotencyFT {
 
@@ -26,7 +25,6 @@ class IdempotencyFT {
         assertThat(pomPath).exists()
         val pom = String(Files.readAllBytes(pomPath))
         assertThat(pom).contains("<artifactId>child</artifactId>")
-        // Sanity: the <artifactId> element appears exactly once — no double-configuration produced duplicate publications.
         assertThat(pom.split("<artifactId>child</artifactId>").size - 1).isEqualTo(1)
     }
 }

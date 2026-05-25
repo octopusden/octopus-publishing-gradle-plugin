@@ -4,20 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.slf4j.LoggerFactory
 
-/**
- * Entry point for `id("org.octopusden.octopus-publishing")`.
- *
- * Responsibilities:
- *  - Register the [OctopusPublishingExtension] (`octopusPublishing { ... }`).
- *  - Apply `com.jfrog.artifactory` to the root project and every subproject
- *    (parity with the RM plugin's `setupRootPublishing`).
- *  - Delegate the actual `maven-publish` and Artifactory configuration to
- *    [PublishingConfigurer] and [ArtifactoryConfigurer].
- *
- * Apply this plugin on the **root project**. Applying it from a subproject is
- * tolerated (it resolves [Project.getRootProject] and bootstraps the same
- * global setup), but root-only is the supported pattern.
- */
+/** Entry point for `id("org.octopusden.octopus-publishing")`. Apply on the root project. */
 class OctopusPublishingPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
@@ -46,16 +33,10 @@ class OctopusPublishingPlugin : Plugin<Project> {
 
     private fun setupRootPublishing(project: Project) {
         val rootProject = project.rootProject
-        // Use extraProperties.has(...) rather than Project.hasProperty(...) so
-        // a user-supplied project property of the same name (e.g.
-        // -PsetupOctopusPublishing=..., or a stray entry in gradle.properties)
-        // cannot silently skip the required root configuration.
         val rootExtras = rootProject.extensions.extraProperties
         if (!rootExtras.has(SETUP_MARKER)) {
             rootExtras.set(SETUP_MARKER, true)
             rootProject.pluginManager.apply(ArtifactoryConfigurer.ARTIFACTORY_PLUGIN_ID)
-            // RM plugin parity: auto-apply maven-publish to the root project
-            // (subprojects must apply it themselves).
             rootProject.pluginManager.apply("maven-publish")
             rootProject.subprojects { subProject ->
                 subProject.pluginManager.apply(ArtifactoryConfigurer.ARTIFACTORY_PLUGIN_ID)

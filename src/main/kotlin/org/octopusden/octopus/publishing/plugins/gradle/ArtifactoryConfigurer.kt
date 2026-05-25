@@ -6,28 +6,6 @@ import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 import org.slf4j.LoggerFactory
 
-/**
- * Configures the `com.jfrog.artifactory` plugin.
- *
- * Split into two entry points to mirror the RM plugin and keep the build-info
- * JSON limited to actually-published modules:
- *
- *  - [configureRoot] sets the `artifactory { publish { ... } }` DSL on the
- *    root project only (context URL, repo key, credentials, `publishBuildInfo`).
- *    Subprojects inherit this via the JFrog plugin.
- *  - [configurePerProject] performs per-project wiring:
- *    `publish.dependsOn(artifactoryPublish)` when `maven-publish` is present,
- *    or `artifactoryPublish.skip = true` otherwise.
- *
- * Resolution order:
- *  - URL: env `ARTIFACTORY_URL` → project property `artifactoryUrl`
- *  - Username: env `ARTIFACTORY_DEPLOYER_USERNAME` → project property of the same name
- *  - Password: env `ARTIFACTORY_DEPLOYER_PASSWORD` → project property of the same name
- *  - Repo key: extension `releaseRepoKey` if `-PpublishToReleaseRepository=true`, else `devRepoKey`
- *
- * The legacy `mavenUser` / `mavenPassword` fallback from
- * `octopus-rm-gradle-plugin` has been intentionally dropped.
- */
 object ArtifactoryConfigurer {
 
     private val LOGGER = LoggerFactory.getLogger(ArtifactoryConfigurer::class.java)
@@ -40,17 +18,8 @@ object ArtifactoryConfigurer {
     const val ARTIFACTORY_PLUGIN_ID = "com.jfrog.artifactory"
 
     /**
-     * Configure the `artifactory { publish { ... } }` block on the ROOT project
-     * only. Subprojects inherit this configuration through the JFrog plugin's
-     * per-project `artifactoryPublish` tasks. This mirrors the RM plugin and
-     * ensures the JFrog build-info JSON contains module entries only for
-     * subprojects whose `artifactoryPublish` actually runs.
-     *
-     * The configuration runs inside `rootProject.afterEvaluate { ... }` so
-     * that user customizations in `octopusPublishing { ... }` (e.g. custom
-     * `devRepoKey` / `releaseRepoKey`) are applied. Reading the extension's
-     * `Property` values during plugin `apply()` would capture the defaults
-     * before the consumer's build script has had a chance to set them.
+     * Configure the `artifactory { publish { ... } }` block on the root project
+     * only — subprojects inherit it through their own `artifactoryPublish` tasks.
      */
     fun configureRoot(rootProject: Project, extension: OctopusPublishingExtension) {
         rootProject.afterEvaluate {
@@ -89,10 +58,9 @@ object ArtifactoryConfigurer {
     }
 
     /**
-     * Per-project wiring: hook `publish` to `artifactoryPublish` when
-     * `maven-publish` is present; otherwise mark `artifactoryPublish.skip = true`
-     * so the aggregate deploy does not fail. Does NOT touch the
-     * `artifactory { publish { ... } }` DSL — that is set on the root only.
+     * Hook `publish` to depend on `artifactoryPublish` when `maven-publish` is
+     * present, otherwise mark `artifactoryPublish.skip = true` so aggregate
+     * deploys do not fail.
      */
     fun configurePerProject(project: Project) {
         project.afterEvaluate { p ->
@@ -101,31 +69,11 @@ object ArtifactoryConfigurer {
                 val artifactoryPublishTask = p.tasks.findByName("artifactoryPublish")
                 if (publishTask != null && artifactoryPublishTask != null) {
                     publishTask.dependsOn(artifactoryPublishTask)
-                    // artifactoryPublish handles the upload, so we disable every
-                    // PublishToMavenRepository task to avoid duplicate uploads to
-                    // the Artifactory endpoint.
-                    //
-                    // Trade-off (intentional, RM plugin parity): this is a blanket
-                    // disable, not URL-scoped. If a consumer configures an
-                    // additional non-Artifactory Maven repository in its
-                    // `publishing { repositories { ... } }` block, that repo's
-                    // publish task is also disabled. The plugin's contract is
-                    // "Artifactory-only publishing for CI"; mixed-repo scenarios
-                    // are out of scope. A URL-scoped disable was considered and
-                    // rejected because string-matching `repository.url` against
-                    // the Artifactory `baseUrl` introduces a silent
-                    // double-upload failure mode on URL mismatches
-                    // (trailing slash, host alias, http vs https).
                     p.tasks.withType(PublishToMavenRepository::class.java).configureEach { t ->
                         t.enabled = false
                     }
                 }
             } else {
-                // RM plugin parity: project has com.jfrog.artifactory applied
-                // (via setupRootPublishing) but no maven-publish — tell the
-                // JFrog plugin to skip this project's contribution to the
-                // build-info / deploy step so the aggregate artifactoryDeploy
-                // does not fail.
                 val artifactoryPublishTask = p.tasks.findByName("artifactoryPublish") as? ArtifactoryTask
                 if (artifactoryPublishTask != null) {
                     LOGGER.info("{} has no maven-publish; skipping artifactoryPublish", p)

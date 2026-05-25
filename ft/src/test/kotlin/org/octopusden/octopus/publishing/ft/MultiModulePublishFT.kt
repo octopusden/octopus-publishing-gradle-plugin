@@ -7,13 +7,6 @@ import org.junit.jupiter.api.Test
 import org.xmlunit.assertj3.XmlAssert
 import java.nio.file.Files
 
-/**
- * Verifies Option-A multi-project parity with RM plugin:
- *   - plugin applied only at the root configures EVERY subproject;
- *   - each subproject gets a mavenJava publication generated from `java`;
- *   - `publish` depends on `artifactoryPublish` per subproject (verified
- *     through `--dry-run --info` output when Artifactory is configured).
- */
 class MultiModulePublishFT {
 
     @Test
@@ -54,7 +47,6 @@ class MultiModulePublishFT {
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
 
         val joined = result.stdout.joinToString("\n")
-        // --dry-run lists the task graph; both subprojects should schedule artifactoryPublish.
         assertThat(joined).contains(":sub-a:artifactoryPublish")
         assertThat(joined).contains(":sub-b:artifactoryPublish")
         assertThat(joined).contains(":sub-a:publish")
@@ -66,9 +58,6 @@ class MultiModulePublishFT {
     fun testArtifactoryConfiguredOnRootOnly() {
         val result = runGradle {
             testProjectName = "multi-module-publish"
-            // Invoke publish only on sub-a. With root-only artifactory DSL
-            // configuration (RM parity), only sub-a's artifactoryPublish must
-            // appear in the task graph; sub-b's must NOT.
             tasks = listOf(":sub-a:publish", "--dry-run", "--info")
             additionalEnvVariables = mapOf(
                 "ARTIFACTORY_URL" to "https://artifactory.example.invalid",
@@ -79,15 +68,11 @@ class MultiModulePublishFT {
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
 
         val joined = result.stdout.joinToString("\n")
-        // sub-a is the invoked target.
         assertThat(joined).contains(":sub-a:artifactoryPublish")
         assertThat(joined).contains(":sub-a:publish")
-        // sub-b's artifactoryPublish must NOT be scheduled — verifies that we
-        // do not configure the artifactory.publish DSL per-subproject.
         assertThat(joined).doesNotContain(":sub-b:artifactoryPublish")
         assertThat(joined).doesNotContain(":sub-b:publish")
-        // The root-level "Configuring Artifactory publish" log line should appear
-        // exactly once (root project only), not once per subproject.
+        // Root-level configuration runs exactly once, not once per subproject.
         val configureLogCount = result.stdout.count { it.contains("Configuring Artifactory publish:") }
         assertEquals(
             1,

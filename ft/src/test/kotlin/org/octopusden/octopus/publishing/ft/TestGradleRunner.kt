@@ -12,16 +12,9 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.PosixFilePermission
 
 /**
- * Lambda-DSL harness for running the plugin against a packaged test consumer
- * project. Modelled on `OcTemplatePluginRunner` from
- * `octopus-oc-template-gradle-plugin`.
- *
- * Each invocation:
- *   1. Copies the named project template from `src/test/resources/projects/<name>`
- *      into a fresh temporary directory (so tests are isolated).
- *   2. Copies the parent project's `gradlew` wrapper into the temp dir so the
- *      template doesn't need its own.
- *   3. Runs `./gradlew <tasks> <args>` with the supplied env vars + properties.
+ * Lambda-DSL harness that copies a packaged test project from
+ * `src/test/resources/projects/<name>` into a temp directory, drops the
+ * parent's `gradlew` wrapper into it, and runs the requested tasks.
  */
 class TestGradleRun {
     lateinit var testProjectName: String
@@ -47,7 +40,6 @@ fun runGradle(init: TestGradleRun.() -> Unit): GradleRunResult {
     val projectPath = Files.createTempDirectory("publishing-ft-${config.testProjectName}-")
     copyDirectory(templatePath, projectPath)
 
-    // Copy a Gradle wrapper into the temp project so the template doesn't need its own.
     val wrapperSource = locateWrapperRoot()
     copyWrapper(wrapperSource, projectPath)
 
@@ -97,10 +89,8 @@ private fun locateResource(path: String): Path {
 }
 
 /**
- * Locate the FT-project's `gradle/wrapper/` directory by walking up from the
- * test working directory. We rely on convention: FT runs from the
- * `octopus-publishing-gradle-plugin/ft/` directory and its parent has the
- * wrapper.
+ * Walk up from the test working directory to find the `gradle/wrapper/`
+ * directory of the FT project.
  */
 private fun locateWrapperRoot(): Path {
     var dir: Path = Paths.get("").toAbsolutePath()

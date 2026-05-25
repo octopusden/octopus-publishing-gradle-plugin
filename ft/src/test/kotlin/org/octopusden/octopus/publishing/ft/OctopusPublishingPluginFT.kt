@@ -10,19 +10,7 @@ import org.xmlunit.assertj3.XmlAssert
 import java.nio.file.Files
 import java.util.UUID
 
-/**
- * FT for the octopus-publishing-gradle-plugin. Covers the scenarios decided
- * during planning:
- *
- * 1. Per-publication `pom { … }` (vanilla maven-publish) flows into the generated POM
- * 2. Credential resolution (env vs project-property precedence)
- * 3. Repo-key selection (`publishToReleaseRepository` flag)
- */
 class OctopusPublishingPluginFT {
-
-    // --------------------------------------------------------------------
-    // 1. POM CUSTOMIZATION (consumer-side `pom { … }` block)
-    // --------------------------------------------------------------------
 
     @Test
     @DisplayName("consumer-side `pom { … }` block populates name/description/url/licenses/scm/developers in the generated POM")
@@ -50,10 +38,6 @@ class OctopusPublishingPluginFT {
         XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:developers/p:developer/p:id")
             .isEqualTo("ft")
     }
-
-    // --------------------------------------------------------------------
-    // 2. CREDENTIAL RESOLUTION
-    // --------------------------------------------------------------------
 
     @ParameterizedTest(name = "credentials via {0}")
     @CsvSource(
@@ -85,7 +69,6 @@ class OctopusPublishingPluginFT {
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
 
         val joined = result.stdout.joinToString("\n")
-        // ArtifactoryConfigurer logs the contextUrl & repoKey at INFO when credentials resolve.
         assertThat(joined).contains("Configuring Artifactory publish")
         assertThat(joined).contains("contextUrl=https://artifactory.example.invalid/artifactory")
     }
@@ -96,16 +79,11 @@ class OctopusPublishingPluginFT {
         val result = runGradle {
             testProjectName = "simple-publish"
             tasks = listOf("help", "--info")
-            // No ARTIFACTORY_URL env/property
         }
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
         val joined = result.stdout.joinToString("\n")
         assertThat(joined).contains("Artifactory URL is not provided")
     }
-
-    // --------------------------------------------------------------------
-    // 3. REPO-KEY SELECTION
-    // --------------------------------------------------------------------
 
     @ParameterizedTest(name = "publishToReleaseRepository={0} → repoKey={1}")
     @CsvSource(
@@ -132,8 +110,8 @@ class OctopusPublishingPluginFT {
 
     @ParameterizedTest(name = "custom extension repoKey: publishToReleaseRepository={0} → repoKey={1}")
     @CsvSource(
-        ",     my-custom-dev",      // unset → dev → custom dev key from extension
-        "true, my-custom-release",  // release → custom release key from extension
+        ",     my-custom-dev",
+        "true, my-custom-release",
     )
     @DisplayName("custom devRepoKey / releaseRepoKey from octopusPublishing { … } are honored (regression: configureRoot must defer until afterEvaluate)")
     fun testCustomRepoKeyFromExtension(flag: String?, expectedRepoKey: String) {

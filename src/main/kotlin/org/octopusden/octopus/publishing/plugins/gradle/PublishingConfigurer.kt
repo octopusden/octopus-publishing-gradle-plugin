@@ -6,12 +6,8 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 
 /**
- * Ensures a `mavenJava` publication exists for the `java` software component
- * when the project has both `maven-publish` applied and a `java` component.
- *
- * Does NOT apply `maven-publish` itself — the consumer is
- * responsible for applying `maven-publish`. If `maven-publish` is never
- * applied, this configurer is a no-op.
+ * Creates a default `mavenJava` publication from the `java` component when
+ * `maven-publish` is applied. No-op otherwise.
  */
 object PublishingConfigurer {
 

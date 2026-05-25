@@ -7,13 +7,8 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 
 /**
- * Root project has `java-library` + the publishing plugin but does NOT
- * explicitly apply `maven-publish`. Verifies the rm-plugin parity path:
- *   - the plugin auto-applies `maven-publish` on the root;
- *   - `PublishingConfigurer` reacts to it and creates `mavenJava` from the
- *     java component;
- *   - the root is therefore publishable end-to-end (POM generated +
- *     `:publish` wired to `:artifactoryPublish`).
+ * Root has `java-library` but does NOT apply `maven-publish` explicitly; the
+ * plugin auto-applies it and `mavenJava` is still created.
  */
 class RootWithJavaNoMavenPublishFT {
 
@@ -48,11 +43,8 @@ class RootWithJavaNoMavenPublishFT {
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
 
         val joined = result.stdout.joinToString("\n")
-        // Both root tasks must appear in the dry-run task graph — proves the
-        // root has a real publication AND the publish→artifactoryPublish wiring.
         assertThat(joined).contains(":publish")
         assertThat(joined).contains(":artifactoryPublish")
-        // And no "nothing to publish" message — root really has a publication.
         assertThat(joined).doesNotContain("None of the specified publications matched for project ':'")
     }
 }
