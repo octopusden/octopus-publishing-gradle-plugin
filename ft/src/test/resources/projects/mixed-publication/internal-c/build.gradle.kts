@@ -9,10 +9,4 @@ java {
     }
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-        }
-    }
-}
+// Intentionally no `publishing { publications { ... } }` block.

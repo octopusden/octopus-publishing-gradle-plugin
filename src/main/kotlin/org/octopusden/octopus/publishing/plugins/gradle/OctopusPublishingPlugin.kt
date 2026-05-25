@@ -24,7 +24,6 @@ class OctopusPublishingPlugin : Plugin<Project> {
         ArtifactoryConfigurer.configureRoot(root, extension)
 
         root.allprojects { p ->
-            PublishingConfigurer.configure(p)
             ArtifactoryConfigurer.configurePerProject(p)
         }
 

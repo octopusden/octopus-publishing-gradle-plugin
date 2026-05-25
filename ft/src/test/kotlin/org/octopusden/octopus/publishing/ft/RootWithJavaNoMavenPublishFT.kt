@@ -8,12 +8,13 @@ import java.nio.file.Files
 
 /**
  * Root has `java-library` but does NOT apply `maven-publish` explicitly; the
- * plugin auto-applies it and `mavenJava` is still created.
+ * plugin auto-applies `maven-publish` (rm-plugin parity), and the consumer
+ * declares its own `mavenJava` publication.
  */
 class RootWithJavaNoMavenPublishFT {
 
     @Test
-    @DisplayName("root with `java-library` but no explicit `maven-publish` still gets a mavenJava publication (POM generated)")
+    @DisplayName("root with `java-library` and no explicit `maven-publish` publishes the consumer-declared mavenJava publication (POM generated)")
     fun testRootMavenJavaPublicationGenerated() {
         val result = runGradle {
             testProjectName = "root-java-no-mavenpublish"
