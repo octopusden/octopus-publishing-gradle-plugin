@@ -33,7 +33,6 @@ object ArtifactoryConfigurer {
             val password = System.getenv(PASS_ENV) ?: rootProject.findProperty(PASS_ENV)?.toString()
 
             val releaseFlag = rootProject.findProperty(PUBLISH_RELEASE_PROP)?.toString()
-                ?: System.getProperty(PUBLISH_RELEASE_PROP, System.getenv(PUBLISH_RELEASE_PROP))
             val publishToRelease = "true".equals(releaseFlag, ignoreCase = true)
             val repoKey = if (publishToRelease) extension.releaseRepoKey.get() else extension.devRepoKey.get()
 
