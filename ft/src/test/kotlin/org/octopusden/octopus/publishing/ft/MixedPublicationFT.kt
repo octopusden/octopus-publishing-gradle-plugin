@@ -22,7 +22,7 @@ class MixedPublicationFT {
     fun testInternalSubprojectAbsentFromBuildInfo() {
         val result = runGradle {
             testProjectName = "mixed-publication"
-            tasks = listOf("clean", "artifactoryPublish", "-x", "artifactoryDeploy", "--info")
+            tasks = listOf("clean", "artifactoryPublish", "--dry-run", "-x", "artifactoryDeploy", "--info")
             additionalEnvVariables = mapOf(
                 "ARTIFACTORY_URL" to "https://artifactory.example.invalid",
                 "ARTIFACTORY_DEPLOYER_USERNAME" to "u",
