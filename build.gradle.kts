@@ -1,11 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import java.time.Duration
 
 plugins {
     kotlin("jvm")
-    groovy
     `java-gradle-plugin`
     `maven-publish`
     signing
@@ -44,18 +42,8 @@ tasks.withType<KotlinJvmCompile>().configureEach {
     }
 }
 
-tasks.named<GroovyCompile>("compileGroovy") {
-    dependsOn(tasks.named("compileKotlin"))
-    classpath += files(tasks.named<KotlinCompile>("compileKotlin").get().destinationDirectory)
-}
-
 tasks.withType<JavaCompile>().configureEach {
     options.release.set(17)
-}
-
-tasks.withType<GroovyCompile>().configureEach {
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
 }
 
 tasks.withType<Test>().configureEach {
