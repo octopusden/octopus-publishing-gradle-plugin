@@ -8,7 +8,6 @@ import org.xmlunit.assertj3.XmlAssert
 import java.nio.file.Files
 
 class MultiModulePublishFT {
-
     @Test
     @DisplayName("plugin applied at root generates POMs in every subproject")
     fun testPomsGeneratedInEverySubproject() {
@@ -27,7 +26,10 @@ class MultiModulePublishFT {
             val pomPath = result.projectPath.resolve("$sub/build/publications/mavenJava/pom-default.xml")
             assertThat(pomPath).`as`("POM for $sub").exists()
             val pom = String(Files.readAllBytes(pomPath))
-            XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:artifactId")
+            XmlAssert
+                .assertThat(pom)
+                .withNamespaceContext(ns)
+                .valueByXPath("//p:project/p:artifactId")
                 .isEqualTo(sub)
         }
     }
@@ -54,7 +56,9 @@ class MultiModulePublishFT {
     }
 
     @Test
-    @DisplayName("artifactory { publish { ... } } DSL is configured on root only; invoking one subproject's publish does not schedule sibling artifactoryPublish")
+    @DisplayName(
+        "artifactory { publish { ... } } DSL is configured on root only; invoking one subproject's publish does not schedule sibling artifactoryPublish",
+    )
     fun testArtifactoryConfiguredOnRootOnly() {
         val result = runGradle {
             testProjectName = "multi-module-publish"
@@ -77,7 +81,7 @@ class MultiModulePublishFT {
         assertEquals(
             1,
             configureLogCount,
-            "expected 'Configuring Artifactory publish' to be logged exactly once (root only), got $configureLogCount"
+            "expected 'Configuring Artifactory publish' to be logged exactly once (root only), got $configureLogCount",
         )
     }
 }

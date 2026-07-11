@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:MixedPublicationFT.kt$MixedPublicationFT$"aggregate :artifactoryPublish via --dry-run includes lib-a/lib-b but internal-c uploads no artifacts (ALL_PUBLICATIONS resolves to empty)"</ID>
+    <ID>MaxLineLength:MultiModulePublishFT.kt$MultiModulePublishFT$"artifactory { publish { ... } } DSL is configured on root only; invoking one subproject's publish does not schedule sibling artifactoryPublish"</ID>
+    <ID>MaxLineLength:OctopusPublishingPluginFT.kt$OctopusPublishingPluginFT$"custom devRepoKey / releaseRepoKey from octopusPublishing { … } are honored (regression: configureRoot must defer until afterEvaluate)"</ID>
+  </CurrentIssues>
+</SmellBaseline>

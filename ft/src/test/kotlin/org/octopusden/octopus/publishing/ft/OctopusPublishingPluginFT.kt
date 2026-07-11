@@ -11,7 +11,6 @@ import java.nio.file.Files
 import java.util.UUID
 
 class OctopusPublishingPluginFT {
-
     @Test
     @DisplayName("consumer-side `pom { … }` block populates name/description/url/licenses/scm/developers in the generated POM")
     fun testPomCustomization() {
@@ -25,17 +24,35 @@ class OctopusPublishingPluginFT {
         assertThat(pomPath).exists()
         val pom = String(Files.readAllBytes(pomPath))
         val ns = mapOf("p" to "http://maven.apache.org/POM/4.0.0")
-        XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:name")
+        XmlAssert
+            .assertThat(pom)
+            .withNamespaceContext(ns)
+            .valueByXPath("//p:project/p:name")
             .isEqualTo("FT Sample Library")
-        XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:description")
+        XmlAssert
+            .assertThat(pom)
+            .withNamespaceContext(ns)
+            .valueByXPath("//p:project/p:description")
             .isEqualTo("Sample library used by octopus-publishing-gradle-plugin FT")
-        XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:url")
+        XmlAssert
+            .assertThat(pom)
+            .withNamespaceContext(ns)
+            .valueByXPath("//p:project/p:url")
             .isEqualTo("https://example.com/ft-sample")
-        XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:licenses/p:license/p:name")
+        XmlAssert
+            .assertThat(pom)
+            .withNamespaceContext(ns)
+            .valueByXPath("//p:project/p:licenses/p:license/p:name")
             .isEqualTo("Apache-2.0")
-        XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:scm/p:url")
+        XmlAssert
+            .assertThat(pom)
+            .withNamespaceContext(ns)
+            .valueByXPath("//p:project/p:scm/p:url")
             .isEqualTo("https://example.com/ft-sample.git")
-        XmlAssert.assertThat(pom).withNamespaceContext(ns).valueByXPath("//p:project/p:developers/p:developer/p:id")
+        XmlAssert
+            .assertThat(pom)
+            .withNamespaceContext(ns)
+            .valueByXPath("//p:project/p:developers/p:developer/p:id")
             .isEqualTo("ft")
     }
 
@@ -89,10 +106,13 @@ class OctopusPublishingPluginFT {
     @CsvSource(
         "true,  rnd-maven-release-local",
         "false, rnd-maven-dev-local",
-        ",     rnd-maven-dev-local",  // unset → dev (default)
+        ",     rnd-maven-dev-local", // unset → dev (default)
     )
     @DisplayName("publishToReleaseRepository selects the correct repoKey")
-    fun testRepoKeySelection(flag: String?, expectedRepoKey: String) {
+    fun testRepoKeySelection(
+        flag: String?,
+        expectedRepoKey: String,
+    ) {
         val props = mutableMapOf<String, String>()
         flag?.takeIf { it.isNotBlank() }?.let { props["publishToReleaseRepository"] = it.trim() }
 
@@ -113,8 +133,13 @@ class OctopusPublishingPluginFT {
         ",     my-custom-dev",
         "true, my-custom-release",
     )
-    @DisplayName("custom devRepoKey / releaseRepoKey from octopusPublishing { … } are honored (regression: configureRoot must defer until afterEvaluate)")
-    fun testCustomRepoKeyFromExtension(flag: String?, expectedRepoKey: String) {
+    @DisplayName(
+        "custom devRepoKey / releaseRepoKey from octopusPublishing { … } are honored (regression: configureRoot must defer until afterEvaluate)",
+    )
+    fun testCustomRepoKeyFromExtension(
+        flag: String?,
+        expectedRepoKey: String,
+    ) {
         val props = mutableMapOf<String, String>()
         flag?.takeIf { it.isNotBlank() }?.let { props["publishToReleaseRepository"] = it.trim() }
 

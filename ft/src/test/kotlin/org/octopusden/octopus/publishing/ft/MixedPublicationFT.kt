@@ -16,9 +16,10 @@ import org.junit.jupiter.api.Test
  * previously polluted build-info for every `java-library` subproject.
  */
 class MixedPublicationFT {
-
     @Test
-    @DisplayName("aggregate :artifactoryPublish via --dry-run includes lib-a/lib-b but internal-c uploads no artifacts (ALL_PUBLICATIONS resolves to empty)")
+    @DisplayName(
+        "aggregate :artifactoryPublish via --dry-run includes lib-a/lib-b but internal-c uploads no artifacts (ALL_PUBLICATIONS resolves to empty)",
+    )
     fun testInternalSubprojectAbsentFromBuildInfo() {
         val result = runGradle {
             testProjectName = "mixed-publication"

@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:ArtifactoryConfigurer.kt$ArtifactoryConfigurer$LOGGER.info("Configuring Artifactory publish: contextUrl={}/artifactory, repoKey={}", normalizedBaseUrl, repoKey)</ID>
+    <ID>MaxLineLength:OctopusPublishingExtension.kt$OctopusPublishingExtension$val</ID>
+  </CurrentIssues>
+</SmellBaseline>
