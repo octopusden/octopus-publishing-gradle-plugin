@@ -30,32 +30,13 @@ octopusQuality {
     }
 }
 
-// The octopus-quality convention plugin only configures *subprojects* when the build
-// has any (see OctopusQualityPlugin: targets = allprojects - root). This repo keeps its
-// production Kotlin in the code-bearing root (`src/main/kotlin`), so detekt/ktlint on the
-// root are NOT configured by the plugin and the root would never be analysed by
-// `qualityStatic` — a hollow gate for the plugin's own code. Configure the root analysers
-// explicitly and fold them into `qualityStatic` so the root is genuinely gated.
-detekt {
-    buildUponDefaultConfig = true
-    baseline = file("detekt-baseline.xml")
-    ignoreFailures = false
-}
-
-ktlint {
-    ignoreFailures.set(false)
-    baseline.set(file("ktlint-baseline.xml"))
-    filter {
-        exclude("**/generated/**")
-        exclude("**/build/**")
-    }
-}
-
-gradle.projectsEvaluated {
-    tasks.named("qualityStatic").configure {
-        dependsOn("detekt", "ktlintCheck")
-    }
-}
+// octopus-quality 2.4.0 gates the code-bearing root project automatically in multi-module
+// builds: when the root carries its own `src/main/kotlin`, the convention plugin configures
+// the root's detekt/ktlint (bundled detekt.yml + baselines) and folds them into `qualityStatic`.
+// The consumer only needs to apply the detekt/ktlint plugins on the root (see the plugins block);
+// no explicit analyser wiring is required here. (The previous 2.3.x workaround that configured the
+// root analysers by hand — including a `**/build/**` glob exclude — is removed: 2.4.0 fixes both
+// the un-gated root and the over-broad build glob.)
 
 repositories {
     mavenCentral()
