@@ -17,6 +17,22 @@ plugins {
 description = "Octopus publishing gradle plugin (JFrog Artifactory)"
 
 octopusQuality {
+    // Regression guard on what this repository publishes to Maven Central, provided by the
+    // shared policy from octopus-base v2.7.0. The `java-gradle-plugin` marker publication has
+    // an empty `[]` signature (a bare POM, no attached artifacts) and its groupId
+    // (`org.octopusden.octopus-publishing`, hyphen after octopus) differs from the main
+    // publication's group (`org.octopusden.octopus.publishing`, dot-separated).
+    publication {
+        enforceCentralPublications.set(true)
+        centralPublications.set(
+            setOf(
+                ":|pluginMaven|org.octopusden.octopus.publishing:octopus-publishing-gradle-plugin|" +
+                    "[jar, jar:javadoc, jar:sources]",
+                ":|OctopusPublishingPluginPluginMarkerMaven|" +
+                    "org.octopusden.octopus-publishing:org.octopusden.octopus-publishing.gradle.plugin|[]",
+            ),
+        )
+    }
     // Repo has no jacoco/kover wiring — disable coverage verification.
     coverage {
         enabled.set(false)
