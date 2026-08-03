@@ -103,7 +103,10 @@ private fun locateWrapperRoot(): Path {
     error("Could not locate Gradle wrapper to copy into temp test project")
 }
 
-private fun copyWrapper(from: Path, to: Path) {
+private fun copyWrapper(
+    from: Path,
+    to: Path,
+) {
     Files.createDirectories(to.resolve("gradle/wrapper"))
     Files.copy(
         from.resolve("gradle/wrapper/gradle-wrapper.jar"),
@@ -128,7 +131,10 @@ private fun copyWrapper(from: Path, to: Path) {
     }
 }
 
-private fun copyDirectory(source: Path, target: Path) {
+private fun copyDirectory(
+    source: Path,
+    target: Path,
+) {
     Files.walk(source).use { stream ->
         stream.forEach { src ->
             val rel = source.relativize(src)

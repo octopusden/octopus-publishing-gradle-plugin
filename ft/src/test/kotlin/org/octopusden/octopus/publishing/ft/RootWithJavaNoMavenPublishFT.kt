@@ -12,9 +12,10 @@ import java.nio.file.Files
  * declares its own `mavenJava` publication.
  */
 class RootWithJavaNoMavenPublishFT {
-
     @Test
-    @DisplayName("root with `java-library` and no explicit `maven-publish` publishes the consumer-declared mavenJava publication (POM generated)")
+    @DisplayName(
+        "root with `java-library` and no explicit `maven-publish` publishes the consumer-declared mavenJava publication (POM generated)",
+    )
     fun testRootMavenJavaPublicationGenerated() {
         val result = runGradle {
             testProjectName = "root-java-no-mavenpublish"

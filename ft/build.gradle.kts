@@ -1,5 +1,7 @@
 plugins {
     kotlin("jvm")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 version = "1.0-SNAPSHOT"
@@ -32,7 +34,8 @@ kotlin {
 tasks.test {
     dependsOn(rootProject.tasks.named("publishToMavenLocal"))
     useJUnitPlatform()
-    val pluginVersion = providers.gradleProperty("octopus-publishing.version")
+    val pluginVersion = providers
+        .gradleProperty("octopus-publishing.version")
         .orElse(providers.environmentVariable("OCTOPUS_PUBLISHING_VERSION"))
         .getOrElse(rootProject.version.toString())
     environment("OCTOPUS_PUBLISHING_VERSION", pluginVersion)

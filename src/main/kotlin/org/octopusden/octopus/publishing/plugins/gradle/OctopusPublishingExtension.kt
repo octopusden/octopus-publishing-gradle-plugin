@@ -18,14 +18,17 @@ import javax.inject.Inject
  * }
  * ```
  */
-abstract class OctopusPublishingExtension @Inject constructor(objects: ObjectFactory) {
+abstract class OctopusPublishingExtension
+    @Inject
+    constructor(
+        objects: ObjectFactory,
+    ) {
+        /** Artifactory repository key used when `publishToReleaseRepository` is not `true`. */
+        val devRepoKey: Property<String> = objects.property(String::class.java).convention("rnd-maven-dev-local")
 
-    /** Artifactory repository key used when `publishToReleaseRepository` is not `true`. */
-    val devRepoKey: Property<String> = objects.property(String::class.java).convention("rnd-maven-dev-local")
-
-    /** Artifactory repository key used when `-PpublishToReleaseRepository=true` is set. */
-    val releaseRepoKey: Property<String> = objects.property(String::class.java).convention("rnd-maven-release-local")
-}
+        /** Artifactory repository key used when `-PpublishToReleaseRepository=true` is set. */
+        val releaseRepoKey: Property<String> = objects.property(String::class.java).convention("rnd-maven-release-local")
+    }
 
 const val PLUGIN_STATE_PROPERTY = "octopusPublishingConfigurationState"
 
@@ -33,5 +36,4 @@ fun Project.markPluginApplied() {
     rootProject.extensions.extraProperties.set(PLUGIN_STATE_PROPERTY, "applied")
 }
 
-fun Project.isPluginAlreadyApplied(): Boolean =
-    rootProject.extensions.extraProperties.has(PLUGIN_STATE_PROPERTY)
+fun Project.isPluginAlreadyApplied(): Boolean = rootProject.extensions.extraProperties.has(PLUGIN_STATE_PROPERTY)

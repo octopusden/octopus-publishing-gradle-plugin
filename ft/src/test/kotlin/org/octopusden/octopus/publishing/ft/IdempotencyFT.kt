@@ -11,7 +11,6 @@ import java.nio.file.Files
  * subproject; verifies the idempotency guard prevents double configuration.
  */
 class IdempotencyFT {
-
     @Test
     @DisplayName("plugin id applied on root and child does not double-configure or fail")
     fun testPluginIsIdempotent() {

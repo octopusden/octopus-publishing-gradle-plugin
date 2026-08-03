@@ -6,13 +6,13 @@ import org.slf4j.LoggerFactory
 
 /** Entry point for `id("org.octopusden.octopus-publishing")`. Apply on the root project. */
 class OctopusPublishingPlugin : Plugin<Project> {
-
     override fun apply(project: Project) {
         LOGGER.info("Applying octopus-publishing-gradle-plugin to {}", project)
 
         val root = project.rootProject
-        val extension = root.extensions.findByName(EXTENSION_NAME) as? OctopusPublishingExtension
-            ?: root.extensions.create(EXTENSION_NAME, OctopusPublishingExtension::class.java)
+        val extension =
+            root.extensions.findByName(EXTENSION_NAME) as? OctopusPublishingExtension
+                ?: root.extensions.create(EXTENSION_NAME, OctopusPublishingExtension::class.java)
 
         setupRootPublishing(project)
 

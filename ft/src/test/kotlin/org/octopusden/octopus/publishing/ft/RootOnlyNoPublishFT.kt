@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
  * Root has the plugin but no `java` component; subprojects publish normally.
  */
 class RootOnlyNoPublishFT {
-
     @Test
     @DisplayName("root with no `java` component does not fail; root artifactoryPublish has nothing to publish")
     fun testRootArtifactoryPublishSkipped() {
@@ -44,7 +43,10 @@ class RootOnlyNoPublishFT {
         listOf("lib-x", "lib-y").forEach { sub ->
             val pomPath = result.projectPath.resolve("$sub/build/publications/mavenJava/pom-default.xml")
             assertThat(pomPath).`as`("POM for $sub").exists()
-            val pom = String(java.nio.file.Files.readAllBytes(pomPath))
+            val pom = String(
+                java.nio.file.Files
+                    .readAllBytes(pomPath),
+            )
             assertThat(pom).contains("<artifactId>$sub</artifactId>")
         }
     }

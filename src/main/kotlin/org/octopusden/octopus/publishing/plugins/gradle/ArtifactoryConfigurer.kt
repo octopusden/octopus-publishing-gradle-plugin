@@ -7,7 +7,6 @@ import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 import org.slf4j.LoggerFactory
 
 object ArtifactoryConfigurer {
-
     private val LOGGER = LoggerFactory.getLogger(ArtifactoryConfigurer::class.java)
 
     const val URL_ENV = "ARTIFACTORY_URL"
@@ -21,7 +20,10 @@ object ArtifactoryConfigurer {
      * Configure the `artifactory { publish { ... } }` block on the root project
      * only — subprojects inherit it through their own `artifactoryPublish` tasks.
      */
-    fun configureRoot(rootProject: Project, extension: OctopusPublishingExtension) {
+    fun configureRoot(
+        rootProject: Project,
+        extension: OctopusPublishingExtension,
+    ) {
         rootProject.afterEvaluate {
             val baseUrl = System.getenv(URL_ENV) ?: rootProject.findProperty(URL_PROP)?.toString()
             if (baseUrl.isNullOrBlank()) {

@@ -9,9 +9,50 @@ plugins {
     signing
     id("io.github.gradle-nexus.publish-plugin")
     id("com.jfrog.artifactory")
+    id("org.octopusden.octopus-quality")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 description = "Octopus publishing gradle plugin (JFrog Artifactory)"
+
+octopusQuality {
+    // Regression guard on what this repository publishes to Maven Central, provided by the
+    // shared policy from octopus-base v2.7.0. The `java-gradle-plugin` marker publication has
+    // an empty `[]` signature (a bare POM, no attached artifacts) and its groupId
+    // (`org.octopusden.octopus-publishing`, hyphen after octopus) differs from the main
+    // publication's group (`org.octopusden.octopus.publishing`, dot-separated).
+    publication {
+        enforceCentralPublications.set(true)
+        centralPublications.set(
+            setOf(
+                ":|pluginMaven|org.octopusden.octopus.publishing:octopus-publishing-gradle-plugin|" +
+                    "[jar, jar:javadoc, jar:sources]",
+                ":|OctopusPublishingPluginPluginMarkerMaven|" +
+                    "org.octopusden.octopus-publishing:org.octopusden.octopus-publishing.gradle.plugin|[]",
+            ),
+        )
+    }
+    // Repo has no jacoco/kover wiring — disable coverage verification.
+    coverage {
+        enabled.set(false)
+    }
+    // Absorb current debt via baselines, then fail on any new violation.
+    kotlin {
+        failOnViolation.set(true)
+    }
+    java {
+        failOnViolation.set(true)
+    }
+}
+
+// octopus-quality 2.4.0 gates the code-bearing root project automatically in multi-module
+// builds: when the root carries its own `src/main/kotlin`, the convention plugin configures
+// the root's detekt/ktlint (bundled detekt.yml + baselines) and folds them into `qualityStatic`.
+// The consumer only needs to apply the detekt/ktlint plugins on the root (see the plugins block);
+// no explicit analyser wiring is required here. (The previous 2.3.x workaround that configured the
+// root analysers by hand — including a `**/build/**` glob exclude — is removed: 2.4.0 fixes both
+// the un-gated root and the over-broad build glob.)
 
 repositories {
     mavenCentral()
