@@ -10,6 +10,7 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin")
     id("com.jfrog.artifactory")
     id("org.octopusden.octopus-quality")
+    id("org.sonarqube")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
 }
