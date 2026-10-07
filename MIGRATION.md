@@ -27,7 +27,7 @@ For consumers upgrading from `octopus-rm-gradle-plugin` to
 | Extension name                              | (none — used Groovy metaClass tricks only)                        | `octopusPublishing { … }`                                                                           |
 | Repository keys                             | Hard-coded `rnd-maven-{dev,release}-local`                        | Configurable via `octopusPublishing { devRepoKey/releaseRepoKey }` (same defaults)                  |
 | Idempotency flag                            | `setupArtifactoryPublish` + `releaseManagementConfigurationState` | `setupOctopusPublishing` + `octopusPublishingConfigurationState`                                    |
-| Min Gradle                                  | ~7.x                                                              | **9.0+** (built & tested against 9.5.1)                                                             |
+| Min Gradle                                  | ~7.x                                                              | **9.0+** (built & tested against 9.8.0)                                                             |
 | JDK target                                  | 17 (build & runtime)                                              | Build **21** (toolchain), bytecode/runtime **17**                                                   |
 | JFrog Artifactory plugin                    | 4.x / 5.x                                                         | **6.0.4**                                                                                           |
 
