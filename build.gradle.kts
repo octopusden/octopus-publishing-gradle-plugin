@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import java.time.Duration
 
@@ -76,6 +77,19 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
     withJavadocJar()
+}
+
+kotlin {
+    // The Kotlin Gradle plugin (kotlin-plugin.version) is newer than the Kotlin runtime this plugin
+    // ships with (kotlin.version). Hold the compiler to the runtime's level so the metadata stays what
+    // consumers can read and no call reaches a stdlib API newer than the stdlib they get.
+    compilerOptions {
+        languageVersion = KotlinVersion.KOTLIN_2_2
+        apiVersion = KotlinVersion.KOTLIN_2_2
+    }
+    // Version the plugin gives kotlin-stdlib; it defaults to the plugin's version, which would leak
+    // into the published POM/module.
+    coreLibrariesVersion = providers.gradleProperty("kotlin.version").get()
 }
 
 tasks.withType<KotlinJvmCompile>().configureEach {

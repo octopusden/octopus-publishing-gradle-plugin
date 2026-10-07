@@ -9,7 +9,7 @@ behavior, but stripping out everything unrelated to JFrog publishing.
 |                          | Build                 | Consumer              |
 |--------------------------|-----------------------|-----------------------|
 | JDK                      | 21 (Gradle toolchain) | **17+**               |
-| Gradle                   | 9.5.1                 | **9.0+**              |
+| Gradle                   | 9.8.0                 | **9.0+**              |
 | Bytecode target          | 17                    | n/a                   |
 | JFrog Artifactory plugin | 6.0.4                 | bundled by the plugin |
 
